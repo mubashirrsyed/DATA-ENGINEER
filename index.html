@@ -24,8 +24,15 @@
     <script src="script.js" defer></script>
   </head>
   <body>
+    <div class="boot" id="boot" aria-hidden="true">
+      <div class="boot-inner">
+        <p class="boot-line"><span class="boot-prompt">mubashir@lakehouse:~$</span> <span class="boot-cmd"></span><span class="boot-cursor">▌</span></p>
+        <div class="boot-bar"><span></span></div>
+      </div>
+    </div>
     <canvas id="network" aria-hidden="true"></canvas>
     <div class="cursor-glow" aria-hidden="true"></div>
+    <div class="cursor-ring" aria-hidden="true"></div>
     <div class="scroll-progress" aria-hidden="true"><span></span></div>
 
     <header class="site-header">
@@ -36,6 +43,7 @@
       <nav aria-label="Main navigation">
         <a href="#expertise">Expertise</a>
         <a href="#projects">Projects</a>
+        <a href="#experience">Experience</a>
         <a href="#credentials">Credentials</a>
       </nav>
       <a class="nav-mail" href="mailto:mubashirr.data@gmail.com">Email me <span>↗</span></a>
@@ -54,8 +62,8 @@
           <b class="data-packet packet-two"></b>
         </div>
         <div class="hero-copy">
-          <div class="availability reveal"><i></i> Open to data engineering opportunities</div>
-          <p class="kicker reveal">DATA ENGINEER · 5+ YEARS OF EXPERIENCE</p>
+          <div class="availability reveal"><i></i> Immediate joiner · Open to data engineering roles</div>
+          <p class="kicker reveal">AZURE DATA ENGINEER · 5+ YEARS · BENGALURU, INDIA</p>
           <h1 class="reveal">
             Data systems built to be
             <span class="gradient-word" id="rotating-word">reliable.</span>
@@ -115,20 +123,22 @@
             <div class="card-index">01</div><div class="card-icon">↯</div>
             <h3>Pipeline Engineering</h3>
             <p>Metadata-driven orchestration for reusable full and incremental ingestion.</p>
-            <div class="tag-row"><span>ADF</span><span>Dynamic datasets</span><span>Watermarks</span><span>Triggers</span><span>Key Vault</span></div>
+            <div class="tag-row"><span>ADF</span><span>Dynamic datasets</span><span>Linked services</span><span>Watermark control</span><span>Triggers</span><span>Integration Runtime</span><span>Key Vault</span><span>Stored procedures</span></div>
             <div class="mini-pipeline" aria-hidden="true"><i></i><span>Source</span><em></em><span>Ingest</span><em></em><span>Lake</span><em></em><span>Control</span></div>
           </article>
           <article class="bento reveal tilt-card">
             <div class="card-index">02</div><div class="card-icon">△</div>
             <h3>Lakehouse</h3>
-            <p>Bronze, Silver and Gold architecture using Delta Lake and PySpark.</p>
+            <p>Bronze, Silver and Gold architecture using Delta Lake, Auto Loader and PySpark.</p>
             <div class="layer-stack" aria-hidden="true"><span>GOLD</span><span>SILVER</span><span>BRONZE</span></div>
+            <div class="tag-row"><span>Delta MERGE</span><span>Auto Loader</span><span>Spark SQL</span></div>
           </article>
           <article class="bento reveal tilt-card">
             <div class="card-index">03</div><div class="card-icon">⌘</div>
             <h3>Data Modelling</h3>
-            <p>Analytics-ready fact and dimension models with surrogate keys and SCD logic.</p>
+            <p>Analytics-ready fact and dimension models with surrogate keys, SCD Type 1 and Type 2 history.</p>
             <div class="model-nodes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="tag-row"><span>Star schema</span><span>Surrogate keys</span><span>SCD 1 &amp; 2</span></div>
           </article>
           <article class="bento reveal tilt-card">
             <div class="card-index">04</div><div class="card-icon">◉</div>
@@ -240,9 +250,114 @@
         </div>
       </section>
 
+      <section class="section experience" id="experience">
+        <div class="section-intro split reveal">
+          <div><p class="kicker">03 / CAREER TRACK</p><h2>Five years inside <span>enterprise data teams.</span></h2></div>
+          <p>Hands-on delivery across two organisations, moving from cloud ingestion and warehouse administration into full lakehouse ownership on Azure.</p>
+        </div>
+
+        <div class="timeline">
+          <article class="role reveal" data-role="epsilon">
+            <div class="role-rail" aria-hidden="true"><i class="role-dot"></i><i class="role-line"></i></div>
+            <div class="role-body">
+              <div class="role-head">
+                <div>
+                  <h3>Data Engineer</h3>
+                  <p class="role-org">Epsilon <span>· Publicis Groupe</span></p>
+                </div>
+                <div class="role-meta">
+                  <span class="role-period">Jul 2022 — Nov 2025</span>
+                  <span class="role-place">Bengaluru, India</span>
+                </div>
+              </div>
+              <p class="role-lead">Owned the full lifecycle of Azure data platforms for enterprise clients — from parameterised ingestion frameworks through to governed Gold-layer models consumed by reporting teams.</p>
+
+              <div class="role-tracks">
+                <div class="track">
+                  <div class="track-head"><span class="track-tag azure">AZURE DATA FACTORY</span></div>
+                  <ul>
+                    <li><strong>Reusable ingestion at scale.</strong> Designed a parameterised pipeline built on dynamic datasets and linked services, so a single framework onboards new source tables into ADLS Gen2 instead of one pipeline per table.</li>
+                    <li><strong>Incremental by default.</strong> Introduced a watermark control table with stored procedures, so each run processes only new or changed records — cutting daily processing time while keeping reruns free of skipped or duplicated data.</li>
+                  </ul>
+                </div>
+
+                <div class="track">
+                  <div class="track-head"><span class="track-tag databricks">AZURE DATABRICKS</span></div>
+                  <ul>
+                    <li><strong>Raw to curated.</strong> Authored PySpark notebooks that standardise schema and clean Bronze data into a dependable Silver layer for downstream reporting.</li>
+                    <li><strong>Dimensional Gold layer.</strong> Decomposed a denormalised dataset into fact and dimension tables with surrogate keys, decoupling analytics from source system keys and making the model maintainable over time.</li>
+                    <li><strong>Reliable upserts.</strong> Applied SCD Type 1 through Delta Lake MERGE so dimensions update cleanly on every incremental run, removing manual reconciliation work.</li>
+                    <li><strong>Governance built in.</strong> Established Unity Catalog across Bronze, Silver and Gold to standardise access control and strengthen audit readiness.</li>
+                  </ul>
+                </div>
+
+                <div class="track">
+                  <div class="track-head"><span class="track-tag fabric">MICROSOFT FABRIC</span></div>
+                  <ul>
+                    <li><strong>End-to-end retail platform.</strong> Built Fabric pipelines carrying retail data from ADLS Gen2 into a Fabric Lakehouse.</li>
+                    <li><strong>Quality at the transformation layer.</strong> Developed PySpark notebooks handling nulls, duplicates, datatype conversion and field standardisation.</li>
+                    <li><strong>One unified model.</strong> Created Delta tables integrating Orders, Returns and Inventory into a single retail data model ready for analytical consumption.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="tag-row role-stack"><span>ADF</span><span>Databricks</span><span>PySpark</span><span>Delta Lake</span><span>Unity Catalog</span><span>Microsoft Fabric</span><span>OneLake</span><span>ADLS Gen2</span></div>
+            </div>
+          </article>
+
+          <article class="role reveal" data-role="dreamcare">
+            <div class="role-rail" aria-hidden="true"><i class="role-dot"></i><i class="role-line"></i></div>
+            <div class="role-body">
+              <div class="role-head">
+                <div>
+                  <h3>Data Engineer</h3>
+                  <p class="role-org">Dreamcare Developers Pvt Ltd</p>
+                </div>
+                <div class="role-meta">
+                  <span class="role-period">Oct 2020 — Jul 2022</span>
+                  <span class="role-place">Pune, India</span>
+                </div>
+              </div>
+              <p class="role-lead">Built and ran the Azure-to-Snowflake data path — covering ingestion, automated processing, cost control and recovery discipline.</p>
+
+              <div class="role-tracks">
+                <div class="track">
+                  <div class="track-head"><span class="track-tag snowflake">SNOWFLAKE ELT &amp; ADMINISTRATION</span></div>
+                  <ul>
+                    <li><strong>Cross-platform ingestion.</strong> Delivered Azure-to-Snowflake pipelines using ADF, ADLS Gen2, parameterised linked services, Copy Activity, external stages and COPY INTO across relational and Parquet sources.</li>
+                    <li><strong>Automated processing.</strong> Orchestrated batch and incremental loads with Snowpipe, Streams and Tasks — monitoring executions, investigating failures and running controlled reruns to protect downstream availability.</li>
+                    <li><strong>Cost and recovery discipline.</strong> Right-sized virtual warehouses with auto-suspend and auto-resume, and implemented RBAC, Time Travel and zero-copy cloning for safe access, testing and recovery.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="tag-row role-stack"><span>Snowflake</span><span>Snowpipe</span><span>Streams &amp; Tasks</span><span>COPY INTO</span><span>RBAC</span><span>Time Travel</span><span>Zero-copy cloning</span></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="education-strip reveal">
+          <div class="edu-item">
+            <small>EDUCATION</small>
+            <strong>B.E. Electronics &amp; Telecommunication Engineering</strong>
+            <span>MGM's JNEC · 2020</span>
+          </div>
+          <div class="edu-item">
+            <small>LANGUAGES</small>
+            <strong>SQL · PySpark · Spark SQL</strong>
+            <span>Production transformation and modelling</span>
+          </div>
+          <div class="edu-item">
+            <small>AVAILABILITY</small>
+            <strong>Immediate joiner</strong>
+            <span>Bengaluru, India</span>
+          </div>
+        </div>
+      </section>
+
       <section class="delivery-section">
         <div class="delivery-inner">
-          <div class="section-intro reveal"><p class="kicker">03 / DELIVERY PROFILE</p><h2>Built around ownership, not <span>tool lists.</span></h2></div>
+          <div class="section-intro reveal"><p class="kicker">04 / DELIVERY PROFILE</p><h2>Built around ownership, not <span>tool lists.</span></h2></div>
           <div class="delivery-grid">
             <article class="reveal"><span>01</span><h3>Develop</h3><p>Reusable pipelines, transformation notebooks, Delta models and analytical serving layers.</p></article>
             <article class="reveal"><span>02</span><h3>Operate</h3><p>Job monitoring, validation, controlled reruns, production support and service request resolution.</p></article>
@@ -254,7 +369,7 @@
 
       <section class="section credentials" id="credentials">
         <div class="section-intro split reveal">
-          <div><p class="kicker">04 / CREDENTIALS</p><h2>Verified across the <span>modern data stack.</span></h2></div>
+          <div><p class="kicker">05 / CREDENTIALS</p><h2>Verified across the <span>modern data stack.</span></h2></div>
           <p>Role-based and professional certifications covering Microsoft Fabric, Databricks data engineering and Snowflake.</p>
         </div>
         <div class="credential-grid">
@@ -268,9 +383,10 @@
         <div class="contact-orb" aria-hidden="true"></div>
         <p class="kicker reveal">READY FOR THE NEXT DATA CHALLENGE</p>
         <h2 class="reveal">Let&apos;s build data systems<br /><span>people can trust.</span></h2>
-        <p class="reveal">Email is the only contact channel listed on this portfolio.</p>
+        <p class="reveal">Reach me by email, or connect on LinkedIn.</p>
         <div class="contact-actions reveal">
           <a class="button primary" href="mailto:mubashirr.data@gmail.com">mubashirr.data@gmail.com <span>↗</span></a>
+          <a class="button linkedin" href="PASTE_YOUR_LINKEDIN_URL_HERE" target="_blank" rel="noreferrer">LinkedIn <span>↗</span></a>
           <button class="copy-button" type="button" data-email="mubashirr.data@gmail.com">Copy email</button>
         </div>
         <div class="copy-status" role="status" aria-live="polite"></div>

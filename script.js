@@ -1,7 +1,43 @@
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// Boot sequence — a brief terminal-style intro, shown once per session.
+const boot = document.querySelector("#boot");
+if (boot) {
+  const bootCmdEl = boot.querySelector(".boot-cmd");
+  let bootSeen = false;
+  try {
+    bootSeen = sessionStorage.getItem("boot-seen") === "1";
+  } catch {
+    bootSeen = false;
+  }
+  if (reduceMotion || bootSeen) {
+    boot.remove();
+  } else {
+    const bootText = "mount lakehouse --bronze --silver --gold";
+    let charIndex = 0;
+    const typeBoot = () => {
+      bootCmdEl.textContent = bootText.slice(0, charIndex);
+      charIndex += 1;
+      if (charIndex <= bootText.length) {
+        window.setTimeout(typeBoot, 18);
+      }
+    };
+    typeBoot();
+    window.setTimeout(() => {
+      boot.classList.add("hide");
+      try {
+        sessionStorage.setItem("boot-seen", "1");
+      } catch {
+        /* storage unavailable, ignore */
+      }
+      window.setTimeout(() => boot.remove(), 550);
+    }, 1150);
+  }
+}
+
 const progressBar = document.querySelector(".scroll-progress span");
 const cursorGlow = document.querySelector(".cursor-glow");
+const cursorRing = document.querySelector(".cursor-ring");
 
 function updateScrollProgress() {
   const scrollable = document.documentElement.scrollHeight - window.innerHeight;
@@ -12,11 +48,51 @@ function updateScrollProgress() {
 window.addEventListener("scroll", updateScrollProgress, { passive: true });
 updateScrollProgress();
 
+let pointerX = window.innerWidth / 2;
+let pointerY = window.innerHeight / 2;
+
 if (window.matchMedia("(pointer: fine)").matches) {
   window.addEventListener("pointermove", (event) => {
     cursorGlow.style.left = `${event.clientX}px`;
     cursorGlow.style.top = `${event.clientY}px`;
+    pointerX = event.clientX;
+    pointerY = event.clientY;
   }, { passive: true });
+
+  if (cursorRing && !reduceMotion) {
+    let ringX = pointerX;
+    let ringY = pointerY;
+    const trailRing = () => {
+      ringX += (pointerX - ringX) * 0.2;
+      ringY += (pointerY - ringY) * 0.2;
+      cursorRing.style.transform = `translate(${ringX - 17}px, ${ringY - 17}px)`;
+      requestAnimationFrame(trailRing);
+    };
+    requestAnimationFrame(trailRing);
+  }
+
+  const magneticEls = document.querySelectorAll(".button, .nav-mail, .copy-button, .identity-mark");
+  magneticEls.forEach((el) => {
+    el.addEventListener("pointerenter", () => cursorRing && cursorRing.classList.add("active"));
+    el.addEventListener("pointerleave", () => {
+      cursorRing && cursorRing.classList.remove("active");
+      if (!reduceMotion) el.style.transform = "";
+    });
+    if (!reduceMotion) {
+      el.addEventListener("pointermove", (event) => {
+        const bounds = el.getBoundingClientRect();
+        const relX = event.clientX - (bounds.left + bounds.width / 2);
+        const relY = event.clientY - (bounds.top + bounds.height / 2);
+        el.style.transform = `translate(${relX * 0.22}px, ${relY * 0.3}px)`;
+      });
+    }
+  });
+
+  document.querySelectorAll("a, button").forEach((el) => {
+    if (el.matches(".button, .nav-mail, .copy-button, .identity-mark")) return;
+    el.addEventListener("pointerenter", () => cursorRing && cursorRing.classList.add("active"));
+    el.addEventListener("pointerleave", () => cursorRing && cursorRing.classList.remove("active"));
+  });
 }
 
 const revealObserver = new IntersectionObserver((entries) => {
@@ -36,15 +112,32 @@ document.querySelectorAll(".reveal").forEach((element, index) => {
 const words = ["reliable.", "scalable.", "governed.", "valuable."];
 const rotatingWord = document.querySelector("#rotating-word");
 let wordIndex = 0;
+const scrambleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01#$";
 
-if (!reduceMotion) {
+function scrambleTo(el, target) {
+  const chars = target.split("");
+  const steps = 12;
+  let step = 0;
+  const timer = window.setInterval(() => {
+    el.textContent = chars
+      .map((char, index) => {
+        if (char === " " || char === ".") return char;
+        const revealed = index < (step / steps) * chars.length;
+        return revealed ? char : scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+      })
+      .join("");
+    step += 1;
+    if (step > steps) {
+      window.clearInterval(timer);
+      el.textContent = target;
+    }
+  }, 26);
+}
+
+if (!reduceMotion && rotatingWord) {
   window.setInterval(() => {
-    rotatingWord.classList.add("swap");
-    window.setTimeout(() => {
-      wordIndex = (wordIndex + 1) % words.length;
-      rotatingWord.textContent = words[wordIndex];
-      rotatingWord.classList.remove("swap");
-    }, 260);
+    wordIndex = (wordIndex + 1) % words.length;
+    scrambleTo(rotatingWord, words[wordIndex]);
   }, 2700);
 }
 
@@ -158,18 +251,36 @@ function resizeCanvas() {
   canvas.style.height = `${height}px`;
   context.setTransform(ratio, 0, 0, ratio, 0, 0);
   const particleCount = Math.min(65, Math.max(28, Math.floor(width / 24)));
-  particles = Array.from({ length: particleCount }, () => ({
-    x: Math.random() * width,
-    y: Math.random() * height,
-    vx: (Math.random() - 0.5) * 0.18,
-    vy: (Math.random() - 0.5) * 0.18,
-    radius: Math.random() * 1.4 + 0.5,
-  }));
+  particles = Array.from({ length: particleCount }, () => {
+    const depth = Math.random() * 0.7 + 0.3;
+    return {
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.18 * depth,
+      vy: (Math.random() - 0.5) * 0.18 * depth,
+      radius: (Math.random() * 1.4 + 0.5) * depth,
+      depth,
+    };
+  });
 }
+
+const pointerFine = window.matchMedia("(pointer: fine)").matches;
 
 function drawNetwork() {
   context.clearRect(0, 0, width, height);
   particles.forEach((particle, index) => {
+    if (pointerFine) {
+      const dx = particle.x - pointerX;
+      const dy = particle.y - pointerY;
+      const distance = Math.hypot(dx, dy);
+      if (distance < 130 && distance > 0.01) {
+        const force = ((130 - distance) / 130) * 0.6;
+        particle.vx += (dx / distance) * force * 0.05;
+        particle.vy += (dy / distance) * force * 0.05;
+      }
+    }
+    particle.vx *= 0.985;
+    particle.vy *= 0.985;
     particle.x += particle.vx;
     particle.y += particle.vy;
     if (particle.x < -10) particle.x = width + 10;
@@ -179,7 +290,7 @@ function drawNetwork() {
 
     context.beginPath();
     context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-    context.fillStyle = "rgba(91, 184, 255, .45)";
+    context.fillStyle = `rgba(91, 184, 255, ${0.25 + particle.depth * 0.35})`;
     context.fill();
 
     for (let next = index + 1; next < particles.length; next += 1) {
@@ -213,3 +324,20 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden) cancelAnimationFrame(animationFrame);
   else drawNetwork();
 });
+
+const heroSystem = document.querySelector(".hero-system");
+const heroSection = document.querySelector(".hero");
+
+if (heroSystem && heroSection && !reduceMotion) {
+  const updateHeroTilt = () => {
+    const rect = heroSection.getBoundingClientRect();
+    const travel = rect.height + window.innerHeight;
+    const progress = Math.min(Math.max(1 - (rect.bottom / travel), 0), 1);
+    const rotate = (progress - 0.5) * 14;
+    const lift = progress * -24;
+    heroSystem.style.transform = `perspective(1200px) rotateX(${rotate}deg) translateY(${lift}px)`;
+  };
+  window.addEventListener("scroll", updateHeroTilt, { passive: true });
+  window.addEventListener("resize", updateHeroTilt, { passive: true });
+  updateHeroTilt();
+}
