@@ -35,18 +35,28 @@
     <div class="cursor-ring" aria-hidden="true"></div>
     <div class="scroll-progress" aria-hidden="true"><span></span></div>
 
-    <header class="site-header">
+    <header class="site-header" id="site-header">
       <a class="identity" href="#top" aria-label="Mubashir Syed home">
         <span class="identity-mark">MS</span>
-        <span><strong>Mubashir Syed</strong><small>Data Engineer</small></span>
+        <span><strong>Mubashir Syed</strong><small>Azure Data Engineer</small></span>
       </a>
-      <nav aria-label="Main navigation">
-        <a href="#expertise">Expertise</a>
-        <a href="#projects">Projects</a>
-        <a href="#experience">Experience</a>
-        <a href="#credentials">Credentials</a>
+      <nav class="pipeline-nav" aria-label="Main navigation">
+        <span class="nav-rail" aria-hidden="true"></span>
+        <span class="nav-packet" aria-hidden="true"></span>
+        <a href="#expertise"><b>01</b><em>Expertise</em></a>
+        <a href="#projects"><b>02</b><em>Projects</em></a>
+        <a href="#experience"><b>03</b><em>Experience</em></a>
+        <a href="#credentials"><b>04</b><em>Credentials</em></a>
       </nav>
-      <a class="nav-mail" href="mailto:mubashirr.data@gmail.com">Email me <span>↗</span></a>
+      <div class="header-side">
+        <span class="header-status" aria-hidden="true"><i></i>AVAILABLE</span>
+        <button class="cmdk-trigger" type="button" data-cmdk-open aria-label="Open command palette">
+          <span class="cmdk-trigger-ico" aria-hidden="true">⌘</span>
+          <span class="cmdk-trigger-txt">Jump to…</span>
+          <kbd aria-hidden="true">K</kbd>
+        </button>
+        <a class="nav-mail" href="mailto:mubashirr.data@gmail.com">Email me <span>↗</span></a>
+      </div>
     </header>
 
     <main>
@@ -392,6 +402,24 @@
         <div class="copy-status" role="status" aria-live="polite"></div>
       </section>
     </main>
+
+    <div class="cmdk" id="cmdk" hidden>
+      <div class="cmdk-scrim" data-cmdk-close></div>
+      <div class="cmdk-panel" role="dialog" aria-modal="true" aria-labelledby="cmdk-label">
+        <h2 id="cmdk-label" class="cmdk-sr">Command palette</h2>
+        <div class="cmdk-field">
+          <span class="cmdk-search" aria-hidden="true"></span>
+          <input id="cmdk-input" type="text" autocomplete="off" spellcheck="false" placeholder="Search sections, projects, credentials…" aria-controls="cmdk-list" aria-expanded="true" role="combobox" />
+          <kbd class="cmdk-esc">ESC</kbd>
+        </div>
+        <div class="cmdk-list" id="cmdk-list" role="listbox" aria-label="Results"></div>
+        <div class="cmdk-foot">
+          <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+          <span><kbd>↵</kbd> select</span>
+          <span class="cmdk-foot-brand">mubashir@lakehouse</span>
+        </div>
+      </div>
+    </div>
 
     <footer>
       <a class="identity" href="#top"><span class="identity-mark">MS</span><span><strong>Mubashir Syed</strong><small>Data Engineer</small></span></a>

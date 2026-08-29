@@ -193,15 +193,66 @@ document.querySelectorAll("[data-count]").forEach((counter) => countObserver.obs
 
 const sections = [...document.querySelectorAll("main section[id]")];
 const navLinks = [...document.querySelectorAll(".site-header nav a")];
+const siteHeader = document.querySelector("#site-header");
+const pipelineNav = document.querySelector(".pipeline-nav");
+const navPacket = document.querySelector(".nav-packet");
 
-const sectionObserver = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (!entry.isIntersecting) return;
-    navLinks.forEach((link) => link.classList.toggle("active", link.getAttribute("href") === `#${entry.target.id}`));
+function movePacketTo(link) {
+  if (!navPacket || !pipelineNav || !link) return;
+  const navBounds = pipelineNav.getBoundingClientRect();
+  const linkBounds = link.getBoundingClientRect();
+  const centre = linkBounds.left - navBounds.left + linkBounds.width / 2;
+  navPacket.style.left = `${centre}px`;
+  pipelineNav.classList.add("tracking");
+}
+
+function syncActiveSection() {
+  const line = window.innerHeight * 0.34;
+  let current = null;
+  sections.forEach((section) => {
+    const rect = section.getBoundingClientRect();
+    if (rect.top <= line && rect.bottom > line) current = section;
   });
-}, { threshold: 0.22, rootMargin: "-25% 0px -55%" });
+  if (!current) {
+    const first = sections[0];
+    if (first && first.getBoundingClientRect().top > line) {
+      navLinks.forEach((link) => link.classList.remove("active"));
+      if (pipelineNav) pipelineNav.classList.remove("tracking");
+      return;
+    }
+    return;
+  }
+  let activeLink = null;
+  navLinks.forEach((link) => {
+    const isActive = link.getAttribute("href") === `#${current.id}`;
+    link.classList.toggle("active", isActive);
+    if (isActive) activeLink = link;
+  });
+  if (activeLink) movePacketTo(activeLink);
+  else if (pipelineNav) pipelineNav.classList.remove("tracking");
+}
 
-sections.forEach((section) => sectionObserver.observe(section));
+window.addEventListener("scroll", syncActiveSection, { passive: true });
+syncActiveSection();
+
+if (siteHeader) {
+  const syncHeader = () => siteHeader.classList.toggle("scrolled", window.scrollY > 24);
+  window.addEventListener("scroll", syncHeader, { passive: true });
+  syncHeader();
+}
+
+window.addEventListener("resize", () => {
+  const current = navLinks.find((link) => link.classList.contains("active"));
+  if (current) movePacketTo(current);
+}, { passive: true });
+
+navLinks.forEach((link) => {
+  link.addEventListener("pointerenter", () => movePacketTo(link));
+});
+pipelineNav && pipelineNav.addEventListener("pointerleave", () => {
+  const current = navLinks.find((item) => item.classList.contains("active"));
+  if (current) movePacketTo(current);
+});
 
 if (!reduceMotion && window.matchMedia("(pointer: fine)").matches) {
   document.querySelectorAll(".tilt-card").forEach((card) => {
@@ -341,3 +392,205 @@ if (heroSystem && heroSection && !reduceMotion) {
   window.addEventListener("resize", updateHeroTilt, { passive: true });
   updateHeroTilt();
 }
+
+/* ── Command palette (⌘K / Ctrl+K) ─────────────────────────────────────── */
+(() => {
+  const root = document.querySelector("#cmdk");
+  const input = document.querySelector("#cmdk-input");
+  const list = document.querySelector("#cmdk-list");
+  if (!root || !input || !list) return;
+
+  const email = "mubashirr.data@gmail.com";
+  const commands = [
+    { group: "Navigate", icon: "01", title: "Expertise", sub: "Engineering capabilities across the data lifecycle", run: () => goTo("#expertise") },
+    { group: "Navigate", icon: "02", title: "Projects", sub: "Four production data systems", run: () => goTo("#projects") },
+    { group: "Navigate", icon: "03", title: "Experience", sub: "Epsilon · Dreamcare Developers", run: () => goTo("#experience") },
+    { group: "Navigate", icon: "04", title: "Credentials", sub: "Fabric · Databricks · SnowPro", run: () => goTo("#credentials") },
+    { group: "Navigate", icon: "→", title: "Contact", sub: "Get in touch", run: () => goTo("#contact") },
+
+    { group: "Projects", icon: "AZ", title: "Metadata-Driven Incremental Data Platform", sub: "Azure Data Factory · watermark ingestion framework", run: () => goTo("#projects") },
+    { group: "Projects", icon: "DB", title: "Medallion Lakehouse & Dimensional Serving", sub: "Databricks · Delta MERGE · Unity Catalog", run: () => goTo("#projects") },
+    { group: "Projects", icon: "FB", title: "Unified Retail Analytics Lakehouse", sub: "Microsoft Fabric · OneLake · Direct Lake", run: () => goTo("#projects") },
+    { group: "Projects", icon: "SF", title: "Azure-to-Snowflake Processing Platform", sub: "Snowpipe · Streams & Tasks · Time Travel", run: () => goTo("#projects") },
+
+    { group: "Credentials", kind: "cert", icon: "DP", title: "Microsoft Fabric Data Engineer Associate", sub: "Verify credential on Microsoft Learn", run: () => open("https://learn.microsoft.com/en-us/users/naqshabandisyedmubashiruddinlaeequ-3862/credentials/b01b3e2f0067073f") },
+    { group: "Credentials", kind: "cert", icon: "PRO", title: "Databricks Certified Data Engineer Professional", sub: "Verify credential on Databricks", run: () => open("https://credentials.databricks.com/cf3c2d31-658e-4b5c-8b49-272cedec5c6d") },
+    { group: "Credentials", kind: "cert", icon: "CO", title: "SnowPro Core Certification", sub: "Verify credential on Snowflake", run: () => open("https://achieve.snowflake.com/68e382fc-021b-465d-8d12-8744e63a7e2b") },
+
+    { group: "Actions", kind: "action", icon: "@", title: "Send an email", sub: email, run: () => { window.location.href = `mailto:${email}`; } },
+    { group: "Actions", kind: "action", icon: "⧉", title: "Copy email address", sub: email, run: copyEmail },
+    { group: "Actions", kind: "action", icon: "↑", title: "Back to top", sub: "Return to the hero", run: () => goTo("#top") },
+  ];
+
+  let results = [];
+  let cursor = 0;
+  let lastFocus = null;
+
+  function open(url) {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  function goTo(hash) {
+    const target = document.querySelector(hash);
+    if (target) target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  }
+
+  async function copyEmail() {
+    try {
+      await navigator.clipboard.writeText(email);
+    } catch {
+      /* clipboard blocked — the mailto action still works */
+    }
+  }
+
+  // Subsequence match: "mfab" finds "Microsoft Fabric".
+  function score(query, text) {
+    const q = query.toLowerCase();
+    const t = text.toLowerCase();
+    if (!q) return { hit: true, ranges: [] };
+    const direct = t.indexOf(q);
+    if (direct > -1) return { hit: true, ranges: [[direct, direct + q.length]], weight: 100 - direct };
+    let qi = 0;
+    const ranges = [];
+    for (let ti = 0; ti < t.length && qi < q.length; ti += 1) {
+      if (t[ti] === q[qi]) {
+        ranges.push([ti, ti + 1]);
+        qi += 1;
+      }
+    }
+    return qi === q.length ? { hit: true, ranges, weight: 10 } : { hit: false };
+  }
+
+  function highlight(text, ranges) {
+    if (!ranges || !ranges.length) return escapeHtml(text);
+    let out = "";
+    let at = 0;
+    ranges.forEach(([start, end]) => {
+      out += `${escapeHtml(text.slice(at, start))}<mark>${escapeHtml(text.slice(start, end))}</mark>`;
+      at = end;
+    });
+    return out + escapeHtml(text.slice(at));
+  }
+
+  function escapeHtml(value) {
+    const div = document.createElement("div");
+    div.textContent = value;
+    return div.innerHTML;
+  }
+
+  function render(query) {
+    results = [];
+    commands.forEach((cmd) => {
+      const onTitle = score(query, cmd.title);
+      const onSub = score(query, `${cmd.sub} ${cmd.group}`);
+      if (onTitle.hit) results.push({ cmd, ranges: onTitle.ranges, weight: (onTitle.weight || 0) + 50 });
+      else if (onSub.hit) results.push({ cmd, ranges: [], weight: onSub.weight || 0 });
+    });
+    results.sort((a, b) => b.weight - a.weight);
+
+    if (!results.length) {
+      list.innerHTML = `<div class="cmdk-empty"><b>No matches</b>Try “lakehouse”, “snowflake” or “email”.</div>`;
+      return;
+    }
+
+    let html = "";
+    let group = "";
+    results.forEach((result, index) => {
+      if (result.cmd.group !== group) {
+        group = result.cmd.group;
+        html += `<div class="cmdk-group">${escapeHtml(group.toUpperCase())}</div>`;
+      }
+      html += `<button class="cmdk-item" type="button" role="option" data-index="${index}" data-kind="${result.cmd.kind || "nav"}" aria-selected="${index === cursor}">
+        <span class="cmdk-item-ico" aria-hidden="true">${escapeHtml(result.cmd.icon)}</span>
+        <span class="cmdk-item-body">
+          <span class="cmdk-item-title">${highlight(result.cmd.title, result.ranges)}</span>
+          <span class="cmdk-item-sub">${escapeHtml(result.cmd.sub)}</span>
+        </span>
+        <span class="cmdk-item-go" aria-hidden="true">↵</span>
+      </button>`;
+    });
+    list.innerHTML = html;
+  }
+
+  function moveCursor(delta) {
+    if (!results.length) return;
+    cursor = (cursor + delta + results.length) % results.length;
+    [...list.querySelectorAll(".cmdk-item")].forEach((item) => {
+      const selected = Number(item.dataset.index) === cursor;
+      item.setAttribute("aria-selected", selected ? "true" : "false");
+      if (selected) item.scrollIntoView({ block: "nearest" });
+    });
+  }
+
+  function runAt(index) {
+    const chosen = results[index];
+    if (!chosen) return;
+    closePalette();
+    window.setTimeout(() => chosen.cmd.run(), 60);
+  }
+
+  function openPalette() {
+    if (!root.hidden) return;
+    lastFocus = document.activeElement;
+    root.hidden = false;
+    document.body.classList.add("cmdk-open");
+    input.value = "";
+    cursor = 0;
+    render("");
+    input.focus();
+  }
+
+  function closePalette() {
+    if (root.hidden) return;
+    root.hidden = true;
+    document.body.classList.remove("cmdk-open");
+    if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+  }
+
+  document.querySelectorAll("[data-cmdk-open]").forEach((el) => el.addEventListener("click", openPalette));
+  document.querySelectorAll("[data-cmdk-close]").forEach((el) => el.addEventListener("click", closePalette));
+
+  input.addEventListener("input", () => {
+    cursor = 0;
+    render(input.value.trim());
+  });
+
+  list.addEventListener("click", (event) => {
+    const item = event.target.closest(".cmdk-item");
+    if (item) runAt(Number(item.dataset.index));
+  });
+
+  list.addEventListener("pointermove", (event) => {
+    const item = event.target.closest(".cmdk-item");
+    if (!item) return;
+    const index = Number(item.dataset.index);
+    if (index === cursor) return;
+    cursor = index;
+    [...list.querySelectorAll(".cmdk-item")].forEach((el) => {
+      el.setAttribute("aria-selected", Number(el.dataset.index) === cursor ? "true" : "false");
+    });
+  });
+
+  document.addEventListener("keydown", (event) => {
+    const key = event.key.toLowerCase();
+    if (key === "k" && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      root.hidden ? openPalette() : closePalette();
+      return;
+    }
+    if (root.hidden) {
+      // "/" opens too, unless the visitor is typing in a field.
+      const typing = /^(input|textarea|select)$/i.test(document.activeElement.tagName);
+      if (event.key === "/" && !typing) {
+        event.preventDefault();
+        openPalette();
+      }
+      return;
+    }
+    if (event.key === "Escape") { event.preventDefault(); closePalette(); }
+    else if (event.key === "ArrowDown") { event.preventDefault(); moveCursor(1); }
+    else if (event.key === "ArrowUp") { event.preventDefault(); moveCursor(-1); }
+    else if (event.key === "Enter") { event.preventDefault(); runAt(cursor); }
+    else if (event.key === "Tab") { event.preventDefault(); moveCursor(event.shiftKey ? -1 : 1); }
+  });
+})();
