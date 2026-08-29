@@ -20,8 +20,8 @@
     <meta name="twitter:description" content="Cloud data engineering, lakehouse architecture, analytics platforms and production-grade pipelines." />
     <meta name="twitter:image" content="https://mubashirrsyed.github.io/DATA-ENGINEER/og-image-hd.png" />
     <title>Mubashir Syed | Data Engineer</title>
-    <link rel="stylesheet" href="styles.css?v=4-bright" />
-    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="styles.css?v=7-lab" />
+    <script src="script.js?v=7-lab" defer></script>
   </head>
   <body>
     <div class="boot" id="boot" aria-hidden="true">
@@ -43,10 +43,11 @@
       <nav class="pipeline-nav" aria-label="Main navigation">
         <span class="nav-rail" aria-hidden="true"></span>
         <span class="nav-packet" aria-hidden="true"></span>
-        <a href="#expertise"><b>01</b><em>Expertise</em></a>
-        <a href="#projects"><b>02</b><em>Projects</em></a>
-        <a href="#experience"><b>03</b><em>Experience</em></a>
-        <a href="#credentials"><b>04</b><em>Credentials</em></a>
+        <a href="#expertise"><b>01</b><span class="nav-label">Expertise</span></a>
+        <a href="#projects"><b>02</b><span class="nav-label">Projects</span></a>
+        <a href="#pipeline"><b>03</b><span class="nav-label">Live run</span></a>
+        <a href="#experience"><b>04</b><span class="nav-label">Experience</span></a>
+        <a href="#credentials"><b>05</b><span class="nav-label">Credentials</span></a>
       </nav>
       <div class="header-side">
         <span class="header-status" aria-hidden="true"><i></i>AVAILABLE</span>
@@ -260,9 +261,127 @@
         </div>
       </section>
 
+      <section class="section pipeline-lab" id="pipeline">
+        <div class="section-intro split reveal">
+          <div><p class="kicker">03 / LIVE PIPELINE RUN</p><h2>Watch an incremental load <span>recover itself.</span></h2></div>
+          <p>A simulation of the metadata-driven framework: watermark lookup, parameterised ingestion, medallion transforms and a rerun that resumes without reprocessing what already landed.</p>
+        </div>
+
+        <div class="lab reveal">
+          <div class="lab-stage">
+            <div class="lab-bar">
+              <div class="lab-run">
+                <span class="lab-run-name">incremental_load_customer</span>
+                <span class="lab-badge" id="lab-state" data-state="idle">IDLE</span>
+              </div>
+              <div class="lab-controls">
+                <button class="lab-btn primary" type="button" id="lab-play">Run pipeline</button>
+                <button class="lab-btn" type="button" id="lab-reset">Reset</button>
+              </div>
+            </div>
+
+            <svg class="dag" viewBox="0 0 680 300" role="img" aria-labelledby="dag-t dag-d">
+              <title id="dag-t">Incremental load pipeline graph</title>
+              <desc id="dag-d">Eight tasks from watermark lookup and source ingestion through Bronze, Silver, dimension and fact loads into a Gold model, with a feedback edge that advances the watermark only after the run succeeds.</desc>
+
+              <g class="dag-stages">
+                <text x="60" y="34">CONTROL</text>
+                <text x="172" y="34">INGEST</text>
+                <text x="284" y="34">BRONZE</text>
+                <text x="396" y="34">SILVER</text>
+                <text x="508" y="34">MODEL</text>
+                <text x="620" y="34">GOLD</text>
+              </g>
+
+              <g class="dag-edges" fill="none">
+                <path class="e" data-edge="copy" d="M112,86 H100 Q116,86 116,110 V140 Q116,146 120,146"/>
+                <path class="e" data-edge="copy" d="M112,206 Q116,206 116,182 V152 Q116,146 120,146"/>
+                <path class="e" data-edge="bronze" d="M224,146 H232"/>
+                <path class="e" data-edge="silver" d="M336,146 H344"/>
+                <path class="e" data-edge="dim" d="M448,146 Q452,146 452,120 V92 Q452,86 456,86"/>
+                <path class="e" data-edge="fact" d="M448,146 Q452,146 452,172 V200 Q452,206 456,206"/>
+                <path class="e" data-edge="gold" d="M560,86 Q564,86 564,112 V140 Q564,146 568,146"/>
+                <path class="e" data-edge="gold" d="M560,206 Q564,206 564,180 V152 Q564,146 568,146"/>
+                <path class="e feedback" data-edge="commit" d="M620,172 V250 Q620,264 606,264 H74 Q60,264 60,250 V232"/>
+              </g>
+
+              <g class="dag-nodes">
+                <g class="n" data-node="src" transform="translate(8,60)">
+                  <rect width="104" height="52" rx="11"/>
+                  <circle class="n-dot" cx="90" cy="13" r="4"/>
+                  <text class="n-t" x="12" y="22">Source tables</text>
+                  <text class="n-s" x="12" y="38">12 parameterised</text>
+                </g>
+                <g class="n" data-node="wm" transform="translate(8,180)">
+                  <rect width="104" height="52" rx="11"/>
+                  <circle class="n-dot" cx="90" cy="13" r="4"/>
+                  <text class="n-t" x="12" y="22">Watermark</text>
+                  <text class="n-s" x="12" y="38">control table</text>
+                </g>
+                <g class="n" data-node="copy" transform="translate(120,120)">
+                  <rect width="104" height="52" rx="11"/>
+                  <circle class="n-dot" cx="90" cy="13" r="4"/>
+                  <text class="n-t" x="12" y="22">ADF copy</text>
+                  <text class="n-s" x="12" y="38">dynamic dataset</text>
+                </g>
+                <g class="n" data-node="bronze" transform="translate(232,120)">
+                  <rect width="104" height="52" rx="11"/>
+                  <circle class="n-dot" cx="90" cy="13" r="4"/>
+                  <text class="n-t" x="12" y="22">Bronze land</text>
+                  <text class="n-s" x="12" y="38">ADLS Gen2</text>
+                </g>
+                <g class="n" data-node="silver" transform="translate(344,120)">
+                  <rect width="104" height="52" rx="11"/>
+                  <circle class="n-dot" cx="90" cy="13" r="4"/>
+                  <text class="n-t" x="12" y="22">Silver clean</text>
+                  <text class="n-s" x="12" y="38">PySpark rules</text>
+                </g>
+                <g class="n" data-node="dim" transform="translate(456,60)">
+                  <rect width="104" height="52" rx="11"/>
+                  <circle class="n-dot" cx="90" cy="13" r="4"/>
+                  <text class="n-t" x="12" y="22">Dim MERGE</text>
+                  <text class="n-s" x="12" y="38">SCD Type 1</text>
+                </g>
+                <g class="n" data-node="fact" transform="translate(456,180)">
+                  <rect width="104" height="52" rx="11"/>
+                  <circle class="n-dot" cx="90" cy="13" r="4"/>
+                  <text class="n-t" x="12" y="22">Fact load</text>
+                  <text class="n-s" x="12" y="38">surrogate keys</text>
+                </g>
+                <g class="n" data-node="gold" transform="translate(568,120)">
+                  <rect width="104" height="52" rx="11"/>
+                  <circle class="n-dot" cx="90" cy="13" r="4"/>
+                  <text class="n-t" x="12" y="22">Gold model</text>
+                  <text class="n-s" x="12" y="38">serving layer</text>
+                </g>
+              </g>
+
+              <text class="dag-commit" x="340" y="282">watermark advances only on success</text>
+            </svg>
+
+            <div class="lab-metrics">
+              <div><small>RECORDS</small><strong id="lab-rows">—</strong></div>
+              <div><small>DURATION</small><strong id="lab-dur">—</strong></div>
+              <div><small>WATERMARK</small><strong id="lab-wm">2026-08-27</strong></div>
+              <div><small>MODE</small><strong id="lab-mode">Incremental</strong></div>
+            </div>
+          </div>
+
+          <div class="lab-console">
+            <div class="lab-console-head">
+              <span class="lab-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span>run log</span>
+            </div>
+            <ol class="lab-log" id="lab-log" role="log" aria-live="polite" aria-label="Pipeline run log">
+              <li class="log-hint">Press <b>Run pipeline</b> to execute a load.</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
       <section class="section experience" id="experience">
         <div class="section-intro split reveal">
-          <div><p class="kicker">03 / CAREER TRACK</p><h2>Five years inside <span>enterprise data teams.</span></h2></div>
+          <div><p class="kicker">04 / CAREER TRACK</p><h2>Five years inside <span>enterprise data teams.</span></h2></div>
           <p>Hands-on delivery across two organisations, moving from cloud ingestion and warehouse administration into full lakehouse ownership on Azure.</p>
         </div>
 
@@ -367,7 +486,7 @@
 
       <section class="delivery-section">
         <div class="delivery-inner">
-          <div class="section-intro reveal"><p class="kicker">04 / DELIVERY PROFILE</p><h2>Built around ownership, not <span>tool lists.</span></h2></div>
+          <div class="section-intro reveal"><p class="kicker">05 / DELIVERY PROFILE</p><h2>Built around ownership, not <span>tool lists.</span></h2></div>
           <div class="delivery-grid">
             <article class="reveal"><span>01</span><h3>Develop</h3><p>Reusable pipelines, transformation notebooks, Delta models and analytical serving layers.</p></article>
             <article class="reveal"><span>02</span><h3>Operate</h3><p>Job monitoring, validation, controlled reruns, production support and service request resolution.</p></article>
@@ -379,7 +498,7 @@
 
       <section class="section credentials" id="credentials">
         <div class="section-intro split reveal">
-          <div><p class="kicker">05 / CREDENTIALS</p><h2>Verified across the <span>modern data stack.</span></h2></div>
+          <div><p class="kicker">06 / CREDENTIALS</p><h2>Verified across the <span>modern data stack.</span></h2></div>
           <p>Role-based and professional certifications covering Microsoft Fabric, Databricks data engineering and Snowflake.</p>
         </div>
         <div class="credential-grid">

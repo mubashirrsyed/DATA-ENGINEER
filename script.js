@@ -404,8 +404,9 @@ if (heroSystem && heroSection && !reduceMotion) {
   const commands = [
     { group: "Navigate", icon: "01", title: "Expertise", sub: "Engineering capabilities across the data lifecycle", run: () => goTo("#expertise") },
     { group: "Navigate", icon: "02", title: "Projects", sub: "Four production data systems", run: () => goTo("#projects") },
-    { group: "Navigate", icon: "03", title: "Experience", sub: "Epsilon · Dreamcare Developers", run: () => goTo("#experience") },
-    { group: "Navigate", icon: "04", title: "Credentials", sub: "Fabric · Databricks · SnowPro", run: () => goTo("#credentials") },
+    { group: "Navigate", icon: "03", title: "Live pipeline run", sub: "Interactive DAG — watch an incremental load recover", run: () => goTo("#pipeline") },
+    { group: "Navigate", icon: "04", title: "Experience", sub: "Epsilon · Dreamcare Developers", run: () => goTo("#experience") },
+    { group: "Navigate", icon: "05", title: "Credentials", sub: "Fabric · Databricks · SnowPro", run: () => goTo("#credentials") },
     { group: "Navigate", icon: "→", title: "Contact", sub: "Get in touch", run: () => goTo("#contact") },
 
     { group: "Projects", icon: "AZ", title: "Metadata-Driven Incremental Data Platform", sub: "Azure Data Factory · watermark ingestion framework", run: () => goTo("#projects") },
@@ -419,6 +420,7 @@ if (heroSystem && heroSection && !reduceMotion) {
 
     { group: "Actions", kind: "action", icon: "@", title: "Send an email", sub: email, run: () => { window.location.href = `mailto:${email}`; } },
     { group: "Actions", kind: "action", icon: "⧉", title: "Copy email address", sub: email, run: copyEmail },
+    { group: "Actions", kind: "action", icon: "▶", title: "Run the pipeline demo", sub: "Trigger a simulated incremental load", run: () => { goTo("#pipeline"); window.setTimeout(() => { const b = document.querySelector("#lab-play"); if (b && !b.disabled) b.click(); }, 900); } },
     { group: "Actions", kind: "action", icon: "↑", title: "Back to top", sub: "Return to the hero", run: () => goTo("#top") },
   ];
 
@@ -593,4 +595,216 @@ if (heroSystem && heroSection && !reduceMotion) {
     else if (event.key === "Enter") { event.preventDefault(); runAt(cursor); }
     else if (event.key === "Tab") { event.preventDefault(); moveCursor(event.shiftKey ? -1 : 1); }
   });
+})();
+
+/* ── Live pipeline lab: simulated incremental run with rerun recovery ──── */
+(() => {
+  const svg = document.querySelector(".dag");
+  const logEl = document.querySelector("#lab-log");
+  const playBtn = document.querySelector("#lab-play");
+  const resetBtn = document.querySelector("#lab-reset");
+  const stateEl = document.querySelector("#lab-state");
+  if (!svg || !logEl || !playBtn) return;
+
+  const rowsEl = document.querySelector("#lab-rows");
+  const durEl = document.querySelector("#lab-dur");
+  const wmEl = document.querySelector("#lab-wm");
+  const modeEl = document.querySelector("#lab-mode");
+
+  const node = (id) => svg.querySelector(`.n[data-node="${id}"]`);
+  const edgesTo = (id) => [...svg.querySelectorAll(`.e[data-edge="${id}"]`)];
+
+  // Waves run in order; tasks inside a wave run together.
+  const WAVES = [
+    ["src", "wm"],
+    ["copy"],
+    ["bronze"],
+    ["silver"],
+    ["dim", "fact"],
+    ["gold"],
+  ];
+
+  const TASKS = {
+    src: { dur: 620, start: ["Resolving 12 parameterised source tables"], end: ["ok", "Source metadata resolved"] },
+    wm: { dur: 620, start: ["Reading watermark control table"], end: ["ok", "Last successful load: 2026-08-27 23:00"] },
+    copy: { dur: 780, start: ["Copy activity — filtering rows above watermark"], end: ["ok", "1,284 changed rows staged"] },
+    bronze: { dur: 640, start: ["Writing raw partition to ADLS Gen2"], end: ["ok", "Bronze partition committed"] },
+    silver: { dur: 820, start: ["PySpark — schema standardisation and dedupe"], end: ["ok", "1,284 rows cleaned to Silver"] },
+    dim: { dur: 760, start: ["Delta MERGE — dim_customer (SCD Type 1)"], end: ["ok", "312 upserts applied"] },
+    fact: { dur: 760, start: ["Loading fact_orders with surrogate keys"], end: ["ok", "972 rows loaded"] },
+    gold: { dur: 640, start: ["Publishing Gold serving layer"], end: ["ok", "Gold model refreshed"] },
+  };
+
+  const ALL = Object.keys(TASKS);
+  let clock = 0;
+  let running = false;
+  let attempt = 0;
+  let timers = [];
+  let done = new Set();
+
+  const wait = (ms) => new Promise((resolve) => {
+    const id = window.setTimeout(resolve, reduceMotion ? Math.min(ms, 90) : ms);
+    timers.push(id);
+  });
+
+  function stamp() {
+    clock += 1;
+    const base = 8 * 3600 + 14 * 60 + 3 + clock * 2;
+    const h = String(Math.floor(base / 3600) % 24).padStart(2, "0");
+    const m = String(Math.floor(base / 60) % 60).padStart(2, "0");
+    const s = String(base % 60).padStart(2, "0");
+    return `${h}:${m}:${s}`;
+  }
+
+  function log(level, message) {
+    const hint = logEl.querySelector(".log-hint");
+    if (hint) hint.remove();
+    const li = document.createElement("li");
+    li.className = `lvl-${level}`;
+    const ts = document.createElement("span");
+    ts.className = "log-ts";
+    ts.textContent = stamp();
+    const msg = document.createElement("span");
+    msg.className = "log-msg";
+    msg.textContent = message;
+    li.append(ts, msg);
+    logEl.append(li);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function setNode(id, cls) {
+    const el = node(id);
+    if (!el) return;
+    el.classList.remove("is-running", "is-done", "is-failed", "is-blocked", "is-skipped");
+    if (cls) el.classList.add(cls);
+  }
+
+  function setEdges(id, cls) {
+    edgesTo(id).forEach((edge) => {
+      edge.classList.remove("is-flow", "is-done", "is-dead");
+      if (cls) edge.classList.add(cls);
+    });
+  }
+
+  function setState(state, label) {
+    stateEl.dataset.state = state;
+    stateEl.textContent = label;
+  }
+
+  function clearTimers() {
+    timers.forEach((id) => window.clearTimeout(id));
+    timers = [];
+  }
+
+  function reset(full = true) {
+    clearTimers();
+    running = false;
+    ALL.forEach((id) => { setNode(id, null); setEdges(id, null); });
+    setEdges("commit", null);
+    if (full) {
+      attempt = 0;
+      clock = 0;
+      done = new Set();
+      logEl.innerHTML = '<li class="log-hint">Press <b>Run pipeline</b> to execute a load.</li>';
+      rowsEl.textContent = "—";
+      durEl.textContent = "—";
+      wmEl.textContent = "2026-08-27";
+      modeEl.textContent = "Incremental";
+      setState("idle", "IDLE");
+      playBtn.textContent = "Run pipeline";
+    }
+    playBtn.disabled = false;
+  }
+
+  async function runTask(id, willFail) {
+    setEdges(id, "is-flow");
+    setNode(id, "is-running");
+    log("info", `${id} — ${TASKS[id].start[0]}`);
+    await wait(TASKS[id].dur);
+    if (willFail) {
+      setNode(id, "is-failed");
+      setEdges(id, "is-dead");
+      return false;
+    }
+    setNode(id, "is-done");
+    setEdges(id, "is-done");
+    done.add(id);
+    const [level, text] = TASKS[id].end;
+    log(level, `${id} — ${text}`);
+    return true;
+  }
+
+  async function run() {
+    if (running) return;
+    running = true;
+    attempt += 1;
+    playBtn.disabled = true;
+    resetBtn.disabled = false;
+    setState("running", "RUNNING");
+
+    const first = attempt === 1;
+    const started = performance.now();
+
+    log("head", first ? "▸ Triggered run #1 — incremental" : "▸ Triggered run #2 — resuming from failure");
+    if (!first) {
+      log("info", "Watermark unchanged since run #1 — no data was skipped");
+    }
+
+    for (const wave of WAVES) {
+      const pending = wave.filter((id) => !done.has(id));
+      pending.forEach((id) => {
+        if (!done.has(id)) setNode(id, null);
+      });
+
+      wave.filter((id) => done.has(id)).forEach((id) => {
+        setNode(id, "is-skipped");
+        log("info", `${id} — already succeeded, skipped on rerun`);
+      });
+
+      if (!pending.length) continue;
+
+      const results = await Promise.all(pending.map((id) => runTask(id, first && id === "fact")));
+
+      if (results.includes(false)) {
+        log("err", "fact — schema drift: column 'order_channel' not found in Silver");
+        log("warn", "Downstream tasks blocked — gold not published");
+        log("warn", "Watermark NOT advanced — the next run resumes from 2026-08-27");
+        setNode("gold", "is-blocked");
+        setEdges("gold", "is-dead");
+        setEdges("commit", "is-dead");
+        setState("failed", "FAILED");
+        rowsEl.textContent = "1,284";
+        durEl.textContent = `${((performance.now() - started) / 1000).toFixed(1)}s`;
+        modeEl.textContent = "Halted";
+        playBtn.textContent = "Rerun failed tasks";
+        playBtn.disabled = false;
+        running = false;
+        return;
+      }
+    }
+
+    setEdges("commit", "is-flow");
+    await wait(500);
+    setEdges("commit", "is-done");
+    setNode("wm", "is-done");
+    log("ok", "Watermark advanced to 2026-08-28 23:00");
+    log("head", "▸ Run succeeded — 1,284 rows processed, 0 duplicated");
+
+    wmEl.textContent = "2026-08-28";
+    rowsEl.textContent = "1,284";
+    durEl.textContent = `${((performance.now() - started) / 1000).toFixed(1)}s`;
+    modeEl.textContent = "Incremental";
+    setState("succeeded", "SUCCEEDED");
+    playBtn.textContent = "Run again";
+    playBtn.disabled = false;
+    running = false;
+    attempt = 0;
+    done = new Set();
+  }
+
+  playBtn.addEventListener("click", () => {
+    if (stateEl.dataset.state === "succeeded") reset(true);
+    run();
+  });
+  resetBtn.addEventListener("click", () => reset(true));
 })();
