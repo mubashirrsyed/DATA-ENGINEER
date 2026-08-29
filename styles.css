@@ -282,3 +282,6 @@ body.cmdk-open{overflow:hidden}
 @media(max-width:1000px){.lab{grid-template-columns:1fr}.lab-console{min-height:280px}}
 @media(max-width:700px){.pipeline-lab{padding-top:40px}.lab{margin-top:42px}.lab-stage{padding:18px;border-radius:24px}.lab-console{border-radius:24px}.lab-metrics{grid-template-columns:repeat(2,1fr);gap:14px}.lab-controls{width:100%}.lab-btn{flex:1}}
 @media(prefers-reduced-motion:reduce){.e.is-flow{animation:none}.n.is-running .n-dot,.n.is-failed .n-dot{animation:none}.lab-log li{animation:none}}
+
+/* Gradient word: give the background box room for descenders (g, y, p) */
+.hero h1 .gradient-word{display:block;line-height:1.1;padding-bottom:.1em;margin-bottom:-.14em}
