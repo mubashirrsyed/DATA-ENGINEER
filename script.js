@@ -48,6 +48,31 @@ if (!reduceMotion) {
   }, 2700);
 }
 
+const pipelineCommands = [
+  "run incremental_pipeline --validate",
+  "merge silver.customer --deduplicate",
+  "publish gold.analytics --quality-gate",
+  "monitor pipeline_health --live",
+];
+const pipelineCommand = document.querySelector("#pipeline-command");
+let commandIndex = 0;
+
+if (!reduceMotion && pipelineCommand) {
+  window.setInterval(() => {
+    pipelineCommand.animate(
+      [{ opacity: 1, transform: "translateY(0)" }, { opacity: 0, transform: "translateY(-8px)" }],
+      { duration: 180, fill: "forwards" },
+    ).finished.then(() => {
+      commandIndex = (commandIndex + 1) % pipelineCommands.length;
+      pipelineCommand.textContent = pipelineCommands[commandIndex];
+      pipelineCommand.animate(
+        [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "translateY(0)" }],
+        { duration: 240, fill: "forwards" },
+      );
+    });
+  }, 2600);
+}
+
 const countObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (!entry.isIntersecting) return;
