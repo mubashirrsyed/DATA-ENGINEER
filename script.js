@@ -420,6 +420,7 @@ if (heroSystem && heroSection && !reduceMotion) {
 
     { group: "Actions", kind: "action", icon: "@", title: "Send an email", sub: email, run: () => { window.location.href = `mailto:${email}`; } },
     { group: "Actions", kind: "action", icon: "⧉", title: "Copy email address", sub: email, run: copyEmail },
+    { group: "Actions", kind: "action", icon: "in", title: "Open LinkedIn profile", sub: "linkedin.com/in/mubashir-syed-data-engineer", run: () => open("https://www.linkedin.com/in/mubashir-syed-data-engineer") },
     { group: "Actions", kind: "action", icon: "▶", title: "Run the pipeline demo", sub: "Trigger a simulated incremental load", run: () => { goTo("#pipeline"); window.setTimeout(() => { const b = document.querySelector("#lab-play"); if (b && !b.disabled) b.click(); }, 900); } },
     { group: "Actions", kind: "action", icon: "↑", title: "Back to top", sub: "Return to the hero", run: () => goTo("#top") },
   ];
