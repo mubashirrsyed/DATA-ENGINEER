@@ -112,7 +112,7 @@ document.querySelectorAll(".reveal").forEach((element, index) => {
 const words = ["reliable.", "scalable.", "governed.", "valuable."];
 const rotatingWord = document.querySelector("#rotating-word");
 let wordIndex = 0;
-const scrambleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01#$";
+const scrambleChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789#$%";
 
 function scrambleTo(el, target) {
   const chars = target.split("");
@@ -409,10 +409,10 @@ if (heroSystem && heroSection && !reduceMotion) {
     { group: "Navigate", icon: "05", title: "Credentials", sub: "Fabric · Databricks · SnowPro", run: () => goTo("#credentials") },
     { group: "Navigate", icon: "→", title: "Contact", sub: "Get in touch", run: () => goTo("#contact") },
 
-    { group: "Projects", icon: "AZ", title: "Metadata-Driven Incremental Data Platform", sub: "Azure Data Factory · watermark ingestion framework", run: () => goTo("#projects") },
-    { group: "Projects", icon: "DB", title: "Medallion Lakehouse & Dimensional Serving", sub: "Databricks · Delta MERGE · Unity Catalog", run: () => goTo("#projects") },
-    { group: "Projects", icon: "FB", title: "Unified Retail Analytics Lakehouse", sub: "Microsoft Fabric · OneLake · Direct Lake", run: () => goTo("#projects") },
-    { group: "Projects", icon: "SF", title: "Azure-to-Snowflake Processing Platform", sub: "Snowpipe · Streams & Tasks · Time Travel", run: () => goTo("#projects") },
+    { group: "Projects", icon: "AZ", title: "Metadata-Driven Incremental Data Platform", sub: "Case study — ADF · watermark ingestion framework", run: () => { window.location.href = "case-azure.html"; } },
+    { group: "Projects", icon: "DB", title: "Medallion Lakehouse & Dimensional Serving", sub: "Case study — Databricks · Delta MERGE · Unity Catalog", run: () => { window.location.href = "case-databricks.html"; } },
+    { group: "Projects", icon: "FB", title: "Unified Retail Analytics Lakehouse", sub: "Case study — Fabric · OneLake · Direct Lake", run: () => { window.location.href = "case-fabric.html"; } },
+    { group: "Projects", icon: "SF", title: "Azure-to-Snowflake Processing Platform", sub: "Case study — Snowpipe · Streams & Tasks · Time Travel", run: () => { window.location.href = "case-snowflake.html"; } },
 
     { group: "Credentials", kind: "cert", icon: "DP", title: "Microsoft Fabric Data Engineer Associate", sub: "Verify credential on Microsoft Learn", run: () => open("https://learn.microsoft.com/en-us/users/naqshabandisyedmubashiruddinlaeequ-3862/credentials/b01b3e2f0067073f") },
     { group: "Credentials", kind: "cert", icon: "PRO", title: "Databricks Certified Data Engineer Professional", sub: "Verify credential on Databricks", run: () => open("https://credentials.databricks.com/cf3c2d31-658e-4b5c-8b49-272cedec5c6d") },

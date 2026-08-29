@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A controlled Azure-to-Snowflake design for relational and Parquet data, with automated loads, incremental processing, deliberate compute management and rea" />
+    <meta name="theme-color" content="#f6faff" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Azure-to-Snowflake Processing Platform | Mubashir Syed" />
+    <meta property="og:description" content="A controlled Azure-to-Snowflake design for relational and Parquet data, with automated loads, incremental processing, deliberate compute management and rea" />
+    <meta property="og:image" content="https://mubashirrsyed.github.io/DATA-ENGINEER/og-image-hd.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>Azure-to-Snowflake Processing Platform | Mubashir Syed</title>
+    <link rel="stylesheet" href="styles.css?v=10-type" />
+  </head>
+  <body>
+    <div class="scroll-progress" aria-hidden="true"><span></span></div>
+    <header class="site-header scrolled" id="site-header">
+      <a class="identity" href="index.html#top" aria-label="Mubashir Syed home">
+        <span class="identity-mark">MS</span>
+        <span><strong>Mubashir Syed</strong><small>Azure Data Engineer</small></span>
+      </a>
+      <div class="header-side">
+        <a class="case-back" href="index.html#projects">&#8592; All projects</a>
+        <a class="nav-mail" href="mailto:mubashirr.data@gmail.com">Email me <span>&#8599;</span></a>
+      </div>
+    </header>
+    <main>
+
+      <section class="case-hero">
+        <div class="case-eyebrow"><span class="case-num">04</span><span class="case-tag">SNOWFLAKE · ELT PLATFORM</span></div>
+        <h1>Azure-to-Snowflake Processing Platform</h1>
+        <p class="case-lead">A controlled Azure-to-Snowflake design for relational and Parquet data, with automated loads, incremental processing, deliberate compute management and real recovery options.</p>
+
+        <div class="case-meta">
+          <div><small>ROLE</small><strong>Data Engineer</strong></div>
+          <div><small>PLATFORM</small><strong>Snowflake · Azure Data Factory</strong></div>
+          <div><small>PATTERN</small><strong>Automated ELT + cost control</strong></div>
+          <div><small>CONTEXT</small><strong>Dreamcare Developers · 2020–2022</strong></div>
+        </div>
+      </section>
+
+      <div class="case-body">
+        <section class="case-block">
+          <p class="kicker">THE PROBLEM</p>
+          <h2>Compute was always on, and failures were manual.</h2>
+          <p>Data had to move from Azure into Snowflake across two quite different shapes — relational tables and Parquet files — and each was being handled as its own bespoke process. When a load failed, recovery meant someone deciding by hand what to rerun and hoping the boundary was right.</p>
+          <p>Cost was the second pressure. Warehouses sized for the heaviest job ran continuously regardless of workload, so idle time was billed at peak capacity.</p>
+        </section>
+        <section class="case-block">
+          <p class="kicker">ARCHITECTURE</p>
+          <h2>How it fits together.</h2>
+          <figure class="case-arch">
+            <svg viewBox="0 0 680 210" role="img" aria-label="Architecture diagram">
+            <rect class="arch-band" x="414" y="62" width="266" height="112" rx="14"/>
+            <text class="arch-lbl" x="547" y="52">AUTOMATED — NO MANUAL TRIGGER</text>
+            <path class="arch-e" d="M120.0,118 H146.0" marker-end=""/>
+            <circle cx="133.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <path class="arch-e" d="M258.0,118 H284.0" marker-end=""/>
+            <circle cx="271.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <path class="arch-e" d="M396.0,118 H422.0" marker-end=""/>
+            <circle cx="409.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <path class="arch-e" d="M534.0,118 H560.0" marker-end=""/>
+            <circle cx="547.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <g class="arch-n"><rect x="8.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="20.0" y="114">Azure source</text><text class="a-s" x="20.0" y="130">relational + Parquet</text></g>
+            <g class="arch-n"><rect x="146.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="158.0" y="114">ADLS landing</text><text class="a-s" x="158.0" y="130">staged files</text></g>
+            <g class="arch-n"><rect x="284.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="296.0" y="114">External stage</text><text class="a-s" x="296.0" y="130">COPY INTO</text></g>
+            <g class="arch-n"><rect x="422.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="434.0" y="114">Snowpipe</text><text class="a-s" x="434.0" y="130">auto-ingest</text></g>
+            <g class="arch-n"><rect x="560.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="572.0" y="114">Streams + Tasks</text><text class="a-s" x="572.0" y="130">incremental</text></g>
+            <path class="arch-e dashed" d="M616.0,144 V178 Q616.0,190 604.0,190 H352.0 Q340.0,190 340.0,178 V144"/>
+            <text class="arch-lbl" x="478.0" y="204">Time Travel and zero-copy cloning enable controlled recovery</text>
+            </svg>
+            <figcaption>Loading is automated end to end, while Time Travel and cloning provide a recovery path that does not require re-ingesting from the source.</figcaption>
+          </figure>
+        </section>
+        <section class="case-block">
+          <p class="kicker">ENGINEERING DECISIONS</p>
+          <h2>What was chosen, and why.</h2>
+          <div class="case-grid">
+            <article class="case-card"><h3>One path for two data shapes</h3><p>Relational extracts and Parquet files converge on the same external stage and COPY INTO pattern, rather than each keeping a separate bespoke route into Snowflake.</p><span class="case-why">&#8594; Half as many things to operate.</span></article>
+            <article class="case-card"><h3>Streams and Tasks over schedules</h3><p>Change detection uses Streams, with Tasks reacting to what actually arrived instead of firing on a clock and hoping data is present.</p><span class="case-why">&#8594; Processing follows data, not time.</span></article>
+            <article class="case-card"><h3>Warehouses sized to workload</h3><p>Virtual warehouses were right-sized per workload with auto-suspend and auto-resume, so compute stops when queries do.</p><span class="case-why">&#8594; Idle capacity stops being billed.</span></article>
+            <article class="case-card"><h3>Recovery without re-ingestion</h3><p>Time Travel covers accidental changes and zero-copy cloning creates full-size test environments instantly, so testing and recovery never touch the source system.</p><span class="case-why">&#8594; Mistakes are reversible in place.</span></article>
+          </div>
+        </section>
+        <section class="case-block">
+          <p class="kicker">OUTCOMES</p>
+          <h2>What it delivered.</h2>
+          <div class="case-outcomes">
+            <div class="case-outcome"><strong>Automated</strong><span>Batch and incremental loads run without manual triggers</span></div>
+            <div class="case-outcome"><strong>Right-sized</strong><span>Auto-suspend and auto-resume stop billing idle compute</span></div>
+            <div class="case-outcome"><strong>Recoverable</strong><span>Time Travel and cloning for controlled testing and rollback</span></div>
+          </div>
+        </section>
+        <section class="case-block">
+          <p class="kicker">STACK</p>
+          <h2>Technologies used.</h2>
+          <p>Snowflake · Snowpipe · Streams · Tasks · External stages · COPY INTO · RBAC · Time Travel · Zero-copy cloning · Azure Data Factory · ADLS Gen2</p>
+        </section>
+      </div>
+    </main>
+    <nav class="case-next" aria-label="More projects">
+      <a href="case-fabric.html"><small>PREVIOUS</small><strong>Unified Retail Analytics Lakehouse</strong></a>
+      <a class="to-right" href="case-azure.html"><small>NEXT</small><strong>Metadata-Driven Incremental Data Platform</strong></a>
+    </nav>
+    <footer>
+      <a class="identity" href="index.html#top"><span class="identity-mark">MS</span><span><strong>Mubashir Syed</strong><small>Data Engineer</small></span></a>
+      <p>Designed around modern data engineering.</p>
+      <a href="mailto:mubashirr.data@gmail.com">mubashirr.data@gmail.com</a>
+    </footer>
+  </body>
+</html>

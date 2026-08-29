@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A governed transformation layer that turns raw operational extracts into standardised Silver tables and a maintainable Gold dimensional model that reportin" />
+    <meta name="theme-color" content="#f6faff" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Medallion Lakehouse &amp; Dimensional Serving | Mubashir Syed" />
+    <meta property="og:description" content="A governed transformation layer that turns raw operational extracts into standardised Silver tables and a maintainable Gold dimensional model that reportin" />
+    <meta property="og:image" content="https://mubashirrsyed.github.io/DATA-ENGINEER/og-image-hd.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>Medallion Lakehouse &amp; Dimensional Serving | Mubashir Syed</title>
+    <link rel="stylesheet" href="styles.css?v=10-type" />
+  </head>
+  <body>
+    <div class="scroll-progress" aria-hidden="true"><span></span></div>
+    <header class="site-header scrolled" id="site-header">
+      <a class="identity" href="index.html#top" aria-label="Mubashir Syed home">
+        <span class="identity-mark">MS</span>
+        <span><strong>Mubashir Syed</strong><small>Azure Data Engineer</small></span>
+      </a>
+      <div class="header-side">
+        <a class="case-back" href="index.html#projects">&#8592; All projects</a>
+        <a class="nav-mail" href="mailto:mubashirr.data@gmail.com">Email me <span>&#8599;</span></a>
+      </div>
+    </header>
+    <main>
+
+      <section class="case-hero">
+        <div class="case-eyebrow"><span class="case-num">02</span><span class="case-tag">DATABRICKS · LAKEHOUSE</span></div>
+        <h1>Medallion Lakehouse &amp; Dimensional Serving</h1>
+        <p class="case-lead">A governed transformation layer that turns raw operational extracts into standardised Silver tables and a maintainable Gold dimensional model that reporting teams can depend on.</p>
+
+        <div class="case-meta">
+          <div><small>ROLE</small><strong>Data Engineer</strong></div>
+          <div><small>PLATFORM</small><strong>Azure Databricks · Delta Lake</strong></div>
+          <div><small>PATTERN</small><strong>Medallion + star schema</strong></div>
+          <div><small>CONTEXT</small><strong>Epsilon · 2022–2025</strong></div>
+        </div>
+      </section>
+
+      <div class="case-body">
+        <section class="case-block">
+          <p class="kicker">THE PROBLEM</p>
+          <h2>Reporting was coupled to source system keys.</h2>
+          <p>Raw operational data arrived denormalised and inconsistently typed, with the same business concept spelled differently across extracts. Reports were built directly on top of it, which meant every downstream query carried its own cleaning logic and every source change broke something.</p>
+          <p>The deeper issue was key coupling. Analytical models referenced source primary keys directly, so a system migration or a re-keying on the source side would have invalidated history that had already been reported on.</p>
+        </section>
+        <section class="case-block">
+          <p class="kicker">ARCHITECTURE</p>
+          <h2>How it fits together.</h2>
+          <figure class="case-arch">
+            <svg viewBox="0 0 680 210" role="img" aria-label="Architecture diagram">
+            <rect class="arch-band" x="414" y="62" width="266" height="112" rx="14"/>
+            <text class="arch-lbl" x="547" y="52">SURROGATE KEYS DECOUPLE THE MODEL</text>
+            <path class="arch-e" d="M120.0,118 H146.0" marker-end=""/>
+            <circle cx="133.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <path class="arch-e" d="M258.0,118 H284.0" marker-end=""/>
+            <circle cx="271.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <path class="arch-e" d="M396.0,118 H422.0" marker-end=""/>
+            <circle cx="409.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <path class="arch-e" d="M534.0,118 H560.0" marker-end=""/>
+            <circle cx="547.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <g class="arch-n"><rect x="8.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="20.0" y="114">Bronze</text><text class="a-s" x="20.0" y="130">raw, as landed</text></g>
+            <g class="arch-n"><rect x="146.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="158.0" y="114">PySpark rules</text><text class="a-s" x="158.0" y="130">clean + conform</text></g>
+            <g class="arch-n"><rect x="284.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="296.0" y="114">Silver</text><text class="a-s" x="296.0" y="130">standardised</text></g>
+            <g class="arch-n"><rect x="422.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="434.0" y="114">Delta MERGE</text><text class="a-s" x="434.0" y="130">SCD Type 1</text></g>
+            <g class="arch-n"><rect x="560.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="572.0" y="114">Gold</text><text class="a-s" x="572.0" y="130">fact + dimension</text></g>
+            </svg>
+            <figcaption>Each layer has a single responsibility: Bronze preserves what arrived, Silver makes it trustworthy, Gold makes it answerable. Unity Catalog governs access at every boundary.</figcaption>
+          </figure>
+        </section>
+        <section class="case-block">
+          <p class="kicker">ENGINEERING DECISIONS</p>
+          <h2>What was chosen, and why.</h2>
+          <div class="case-grid">
+            <article class="case-card"><h3>Bronze stays immutable</h3><p>Raw data is never edited in place. Every correction happens downstream, so the landed record remains an auditable account of what the source actually sent.</p><span class="case-why">&#8594; Any transformation can be replayed.</span></article>
+            <article class="case-card"><h3>Surrogate keys in Gold</h3><p>A denormalised dataset was decomposed into fact and dimension tables, each dimension carrying a generated surrogate key rather than the source identifier.</p><span class="case-why">&#8594; Source re-keying no longer breaks history.</span></article>
+            <article class="case-card"><h3>SCD Type 1 through Delta MERGE</h3><p>Dimension upserts run as a single MERGE per incremental batch, matching on business key and updating in place, rather than as a delete-and-insert cycle.</p><span class="case-why">&#8594; Dimensions converge without reconciliation.</span></article>
+            <article class="case-card"><h3>Governance at the layer boundary</h3><p>Unity Catalog defines access per layer, so analysts reach Gold while raw and intermediate data stay restricted, with lineage and audit available across all three.</p><span class="case-why">&#8594; Access reflects data sensitivity.</span></article>
+          </div>
+        </section>
+        <section class="case-block">
+          <p class="kicker">OUTCOMES</p>
+          <h2>What it delivered.</h2>
+          <div class="case-outcomes">
+            <div class="case-outcome"><strong>3 layers</strong><span>Bronze, Silver and Gold each with one clear responsibility</span></div>
+            <div class="case-outcome"><strong>MERGE</strong><span>Dimension upserts converge on every incremental run</span></div>
+            <div class="case-outcome"><strong>Governed</strong><span>Layer-level access control and audit readiness</span></div>
+          </div>
+        </section>
+        <section class="case-block">
+          <p class="kicker">STACK</p>
+          <h2>Technologies used.</h2>
+          <p>Azure Databricks · PySpark · Delta Lake · Delta MERGE · SCD Type 1 · Surrogate keys · Unity Catalog · Spark SQL · Auto Loader</p>
+        </section>
+      </div>
+    </main>
+    <nav class="case-next" aria-label="More projects">
+      <a href="case-azure.html"><small>PREVIOUS</small><strong>Metadata-Driven Incremental Data Platform</strong></a>
+      <a class="to-right" href="case-fabric.html"><small>NEXT</small><strong>Unified Retail Analytics Lakehouse</strong></a>
+    </nav>
+    <footer>
+      <a class="identity" href="index.html#top"><span class="identity-mark">MS</span><span><strong>Mubashir Syed</strong><small>Data Engineer</small></span></a>
+      <p>Designed around modern data engineering.</p>
+      <a href="mailto:mubashirr.data@gmail.com">mubashirr.data@gmail.com</a>
+    </footer>
+  </body>
+</html>

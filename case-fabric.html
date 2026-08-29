@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="An end-to-end Fabric platform integrating orders, returns and inventory into a single Delta-based retail model, ready for analytical consumption through Di" />
+    <meta name="theme-color" content="#f6faff" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Unified Retail Analytics Lakehouse | Mubashir Syed" />
+    <meta property="og:description" content="An end-to-end Fabric platform integrating orders, returns and inventory into a single Delta-based retail model, ready for analytical consumption through Di" />
+    <meta property="og:image" content="https://mubashirrsyed.github.io/DATA-ENGINEER/og-image-hd.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>Unified Retail Analytics Lakehouse | Mubashir Syed</title>
+    <link rel="stylesheet" href="styles.css?v=10-type" />
+  </head>
+  <body>
+    <div class="scroll-progress" aria-hidden="true"><span></span></div>
+    <header class="site-header scrolled" id="site-header">
+      <a class="identity" href="index.html#top" aria-label="Mubashir Syed home">
+        <span class="identity-mark">MS</span>
+        <span><strong>Mubashir Syed</strong><small>Azure Data Engineer</small></span>
+      </a>
+      <div class="header-side">
+        <a class="case-back" href="index.html#projects">&#8592; All projects</a>
+        <a class="nav-mail" href="mailto:mubashirr.data@gmail.com">Email me <span>&#8599;</span></a>
+      </div>
+    </header>
+    <main>
+
+      <section class="case-hero">
+        <div class="case-eyebrow"><span class="case-num">03</span><span class="case-tag">MICROSOFT FABRIC · RETAIL</span></div>
+        <h1>Unified Retail Analytics Lakehouse</h1>
+        <p class="case-lead">An end-to-end Fabric platform integrating orders, returns and inventory into a single Delta-based retail model, ready for analytical consumption through Direct Lake.</p>
+
+        <div class="case-meta">
+          <div><small>ROLE</small><strong>Data Engineer</strong></div>
+          <div><small>PLATFORM</small><strong>Microsoft Fabric · OneLake</strong></div>
+          <div><small>PATTERN</small><strong>Unified domain model</strong></div>
+          <div><small>CONTEXT</small><strong>Epsilon · 2022–2025</strong></div>
+        </div>
+      </section>
+
+      <div class="case-body">
+        <section class="case-block">
+          <p class="kicker">THE PROBLEM</p>
+          <h2>Three datasets that described the same business.</h2>
+          <p>Orders, returns and inventory arrived as separate extracts with their own field names, date formats and product identifiers. Any question that crossed them — return rate by product, stock against demand — required manual reconciliation before it could be answered at all.</p>
+          <p>Because each dataset was analysed independently, the same metric could be produced three different ways and disagree with itself, which is the fastest way for a reporting layer to lose credibility.</p>
+        </section>
+        <section class="case-block">
+          <p class="kicker">ARCHITECTURE</p>
+          <h2>How it fits together.</h2>
+          <figure class="case-arch">
+            <svg viewBox="0 0 680 210" role="img" aria-label="Architecture diagram">
+            <rect class="arch-band" x="276" y="62" width="266" height="112" rx="14"/>
+            <text class="arch-lbl" x="409" y="52">ORDERS · RETURNS · INVENTORY CONFORMED</text>
+            <path class="arch-e" d="M120.0,118 H146.0" marker-end=""/>
+            <circle cx="133.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <path class="arch-e" d="M258.0,118 H284.0" marker-end=""/>
+            <circle cx="271.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <path class="arch-e" d="M396.0,118 H422.0" marker-end=""/>
+            <circle cx="409.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <path class="arch-e" d="M534.0,118 H560.0" marker-end=""/>
+            <circle cx="547.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <g class="arch-n"><rect x="8.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="20.0" y="114">ADLS Gen2</text><text class="a-s" x="20.0" y="130">source extracts</text></g>
+            <g class="arch-n"><rect x="146.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="158.0" y="114">Fabric pipeline</text><text class="a-s" x="158.0" y="130">ingest to OneLake</text></g>
+            <g class="arch-n"><rect x="284.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="296.0" y="114">PySpark</text><text class="a-s" x="296.0" y="130">clean + conform</text></g>
+            <g class="arch-n"><rect x="422.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="434.0" y="114">Delta tables</text><text class="a-s" x="434.0" y="130">unified model</text></g>
+            <g class="arch-n"><rect x="560.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="572.0" y="114">Direct Lake</text><text class="a-s" x="572.0" y="130">serving</text></g>
+            </svg>
+            <figcaption>The integration happens once, in the transformation layer, so every downstream consumer inherits one consistent definition of a product, a date and a transaction.</figcaption>
+          </figure>
+        </section>
+        <section class="case-block">
+          <p class="kicker">ENGINEERING DECISIONS</p>
+          <h2>What was chosen, and why.</h2>
+          <div class="case-grid">
+            <article class="case-card"><h3>Conform before integrating</h3><p>Null handling, duplicate removal and datatype conversion run before the datasets are joined, so integration operates on predictable inputs rather than absorbing source inconsistency.</p><span class="case-why">&#8594; Joins stop producing surprises.</span></article>
+            <article class="case-card"><h3>One vocabulary across domains</h3><p>Product identifiers, date grains and status fields were standardised to shared business definitions, so the same column name means the same thing in all three datasets.</p><span class="case-why">&#8594; Cross-domain questions become answerable.</span></article>
+            <article class="case-card"><h3>Delta tables in OneLake</h3><p>The unified model is written as Delta rather than as extracts, giving ACID guarantees and time travel inside Fabric&#x27;s single storage layer.</p><span class="case-why">&#8594; One copy serves every workload.</span></article>
+            <article class="case-card"><h3>Direct Lake as the serving path</h3><p>The model is shaped for Direct Lake consumption, so reporting reads Delta files directly instead of maintaining a separate import copy.</p><span class="case-why">&#8594; No duplicated serving dataset.</span></article>
+          </div>
+        </section>
+        <section class="case-block">
+          <p class="kicker">OUTCOMES</p>
+          <h2>What it delivered.</h2>
+          <div class="case-outcomes">
+            <div class="case-outcome"><strong>1 model</strong><span>Orders, returns and inventory in a single Delta representation</span></div>
+            <div class="case-outcome"><strong>Conformed</strong><span>Shared product, date and status definitions across domains</span></div>
+            <div class="case-outcome"><strong>Direct Lake</strong><span>Serving reads Delta directly, with no import copy</span></div>
+          </div>
+        </section>
+        <section class="case-block">
+          <p class="kicker">STACK</p>
+          <h2>Technologies used.</h2>
+          <p>Microsoft Fabric · Fabric Data Factory · OneLake Lakehouse · Dataflow Gen2 · PySpark · Delta tables · Direct Lake · ADLS Gen2</p>
+        </section>
+      </div>
+    </main>
+    <nav class="case-next" aria-label="More projects">
+      <a href="case-databricks.html"><small>PREVIOUS</small><strong>Medallion Lakehouse &amp; Dimensional Serving</strong></a>
+      <a class="to-right" href="case-snowflake.html"><small>NEXT</small><strong>Azure-to-Snowflake Processing Platform</strong></a>
+    </nav>
+    <footer>
+      <a class="identity" href="index.html#top"><span class="identity-mark">MS</span><span><strong>Mubashir Syed</strong><small>Data Engineer</small></span></a>
+      <p>Designed around modern data engineering.</p>
+      <a href="mailto:mubashirr.data@gmail.com">mubashirr.data@gmail.com</a>
+    </footer>
+  </body>
+</html>

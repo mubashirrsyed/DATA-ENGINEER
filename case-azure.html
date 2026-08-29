@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A reusable ingestion framework that onboards new source tables through configuration rather than new pipelines, and loads only what changed since the last " />
+    <meta name="theme-color" content="#f6faff" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Metadata-Driven Incremental Data Platform | Mubashir Syed" />
+    <meta property="og:description" content="A reusable ingestion framework that onboards new source tables through configuration rather than new pipelines, and loads only what changed since the last " />
+    <meta property="og:image" content="https://mubashirrsyed.github.io/DATA-ENGINEER/og-image-hd.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>Metadata-Driven Incremental Data Platform | Mubashir Syed</title>
+    <link rel="stylesheet" href="styles.css?v=10-type" />
+  </head>
+  <body>
+    <div class="scroll-progress" aria-hidden="true"><span></span></div>
+    <header class="site-header scrolled" id="site-header">
+      <a class="identity" href="index.html#top" aria-label="Mubashir Syed home">
+        <span class="identity-mark">MS</span>
+        <span><strong>Mubashir Syed</strong><small>Azure Data Engineer</small></span>
+      </a>
+      <div class="header-side">
+        <a class="case-back" href="index.html#projects">&#8592; All projects</a>
+        <a class="nav-mail" href="mailto:mubashirr.data@gmail.com">Email me <span>&#8599;</span></a>
+      </div>
+    </header>
+    <main>
+
+      <section class="case-hero">
+        <div class="case-eyebrow"><span class="case-num">01</span><span class="case-tag">AZURE · INGESTION FRAMEWORK</span></div>
+        <h1>Metadata-Driven Incremental Data Platform</h1>
+        <p class="case-lead">A reusable ingestion framework that onboards new source tables through configuration rather than new pipelines, and loads only what changed since the last successful run.</p>
+
+        <div class="case-meta">
+          <div><small>ROLE</small><strong>Data Engineer</strong></div>
+          <div><small>PLATFORM</small><strong>Azure Data Factory · ADLS Gen2</strong></div>
+          <div><small>PATTERN</small><strong>Metadata-driven ingestion</strong></div>
+          <div><small>CONTEXT</small><strong>Epsilon · 2022–2025</strong></div>
+        </div>
+      </section>
+
+      <div class="case-body">
+        <section class="case-block">
+          <p class="kicker">THE PROBLEM</p>
+          <h2>One pipeline per table does not scale.</h2>
+          <p>The conventional approach to ingestion is to build a pipeline per source table. Each new table means new artefacts to author, test, deploy and monitor. At a dozen tables it is tedious; at fifty it becomes the main cost of the platform, and every change to load behaviour has to be applied in fifty places.</p>
+          <p>The second problem is reload cost. A full extract on every run is simple to write but grows linearly with table size, and it silently hides a correctness risk: if a run fails halfway, there is no reliable record of what was actually processed.</p>
+        </section>
+        <section class="case-block">
+          <p class="kicker">ARCHITECTURE</p>
+          <h2>How it fits together.</h2>
+          <figure class="case-arch">
+            <svg viewBox="0 0 680 210" role="img" aria-label="Architecture diagram">
+            <rect class="arch-band" x="276" y="62" width="266" height="112" rx="14"/>
+            <text class="arch-lbl" x="409" y="52">PARAMETERISED — ONE PIPELINE, ANY TABLE</text>
+            <path class="arch-e" d="M120.0,118 H146.0" marker-end=""/>
+            <circle cx="133.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <path class="arch-e" d="M258.0,118 H284.0" marker-end=""/>
+            <circle cx="271.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <path class="arch-e" d="M396.0,118 H422.0" marker-end=""/>
+            <circle cx="409.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <path class="arch-e" d="M534.0,118 H560.0" marker-end=""/>
+            <circle cx="547.0" cy="118" r="2.4" fill="rgba(8,123,241,.55)"/>
+            <g class="arch-n"><rect x="8.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="20.0" y="114">Source tables</text><text class="a-s" x="20.0" y="130">12 relational</text></g>
+            <g class="arch-n"><rect x="146.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="158.0" y="114">Control table</text><text class="a-s" x="158.0" y="130">watermark store</text></g>
+            <g class="arch-n"><rect x="284.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="296.0" y="114">ADF pipeline</text><text class="a-s" x="296.0" y="130">dynamic dataset</text></g>
+            <g class="arch-n"><rect x="422.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="434.0" y="114">ADLS Gen2</text><text class="a-s" x="434.0" y="130">bronze landing</text></g>
+            <g class="arch-n"><rect x="560.0" y="92" width="112" height="52" rx="11"/><text class="a-t" x="572.0" y="114">Validation</text><text class="a-s" x="572.0" y="130">row + schema check</text></g>
+            <path class="arch-e dashed" d="M616.0,144 V178 Q616.0,190 604.0,190 H214.0 Q202.0,190 202.0,178 V144"/>
+            <text class="arch-lbl" x="409.0" y="204">watermark advances only after a validated load</text>
+            </svg>
+            <figcaption>A single parameterised pipeline reads its instructions from a control table. The watermark is written back only after validation passes, which is what makes a rerun safe.</figcaption>
+          </figure>
+        </section>
+        <section class="case-block">
+          <p class="kicker">ENGINEERING DECISIONS</p>
+          <h2>What was chosen, and why.</h2>
+          <div class="case-grid">
+            <article class="case-card"><h3>Configuration over duplication</h3><p>Datasets and linked services are fully parameterised, so the source table, schema, target path and load mode all arrive as runtime values. Onboarding a table becomes a row in the control table.</p><span class="case-why">&#8594; New sources ship without a deployment.</span></article>
+            <article class="case-card"><h3>Watermark as the unit of truth</h3><p>A control table holds the last successfully processed timestamp per table. Each run reads it, filters the source above it, and only advances it after the load is validated.</p><span class="case-why">&#8594; A failed run is safe to retry.</span></article>
+            <article class="case-card"><h3>Stored procedures for state changes</h3><p>Watermark reads and updates are wrapped in stored procedures rather than inline activity expressions, keeping the transition logic in one auditable place.</p><span class="case-why">&#8594; Load state is testable in isolation.</span></article>
+            <article class="case-card"><h3>Secrets outside the pipeline</h3><p>Every credential resolves through Azure Key Vault at runtime; no connection detail lives in a pipeline definition or repository.</p><span class="case-why">&#8594; Rotation never touches the pipeline.</span></article>
+          </div>
+        </section>
+        <section class="case-block">
+          <p class="kicker">OUTCOMES</p>
+          <h2>What it delivered.</h2>
+          <div class="case-outcomes">
+            <div class="case-outcome"><strong>Config</strong><span>New tables onboard by adding a control row, not by authoring a pipeline</span></div>
+            <div class="case-outcome"><strong>Delta only</strong><span>Each run processes changed records rather than a full extract</span></div>
+            <div class="case-outcome"><strong>Rerun-safe</strong><span>Interrupted runs resume without skipping or duplicating data</span></div>
+          </div>
+        </section>
+        <section class="case-block">
+          <p class="kicker">STACK</p>
+          <h2>Technologies used.</h2>
+          <p>Azure Data Factory · Dynamic datasets · Parameterised linked services · Watermark control table · Stored procedures · Azure Key Vault · ADLS Gen2 · Triggers · Integration Runtime</p>
+        </section>
+      </div>
+    </main>
+    <nav class="case-next" aria-label="More projects">
+      <a href="case-snowflake.html"><small>PREVIOUS</small><strong>Azure-to-Snowflake Processing Platform</strong></a>
+      <a class="to-right" href="case-databricks.html"><small>NEXT</small><strong>Medallion Lakehouse &amp; Dimensional Serving</strong></a>
+    </nav>
+    <footer>
+      <a class="identity" href="index.html#top"><span class="identity-mark">MS</span><span><strong>Mubashir Syed</strong><small>Data Engineer</small></span></a>
+      <p>Designed around modern data engineering.</p>
+      <a href="mailto:mubashirr.data@gmail.com">mubashirr.data@gmail.com</a>
+    </footer>
+  </body>
+</html>
